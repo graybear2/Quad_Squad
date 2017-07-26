@@ -6,9 +6,9 @@
 
 String readString;
 char control;
-Servo topRight; //CLOCKWISE
+Servo topRight; //COUNTERCLOCKWISE
 Servo topLeft;
-Servo bottomLeft; //CLOCKWISE
+Servo bottomLeft; //COUNTERCLOCKWISE
 Servo bottomRight;
 
 
@@ -183,22 +183,22 @@ void driveMotors(){
 
   trMotor = leftRollPositive*downPositive;  //CLOCKWISE
   trMotor /= 1000;
-  trMotor *= rightYawPositive;
+  trMotor *= leftYawPositive;
   trMotor /= 1000;
 
   tlMotor = rightRollPositive*downPositive;
   tlMotor /= 1000;
-  tlMotor *=leftYawPositive;
+  tlMotor *=rightYawPositive;
   tlMotor /= 1000;
 
   blMotor = rightRollPositive*upPositive;
   blMotor /= 1000;
-  blMotor *= rightYawPositive;
+  blMotor *= leftYawPositive;
   blMotor /= 1000;
 
   brMotor = leftRollPositive*upPositive;
   brMotor /= 1000;
-  brMotor *= leftYawPositive;
+  brMotor *= rightYawPositive;
   brMotor /= 1000;
 
 //  Serial.print("TR: ");
