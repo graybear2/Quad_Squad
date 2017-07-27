@@ -6,9 +6,9 @@
 
 String readString;
 char control;
-Servo topRight; //COUNTERCLOCKWISE
+Servo topRight; //CLOCKWISE
 Servo topLeft;
-Servo bottomLeft; //COUNTERCLOCKWISE
+Servo bottomLeft; //CLOCKWISE
 Servo bottomRight;
 
 
@@ -25,61 +25,19 @@ void setup(){
   PCMSK0 |= (1 << PCINT1);  // set PCINT1 (digital input 9)to trigger an interrupt on state change
   PCMSK0 |= (1 << PCINT2);  // set PCINT2 (digital input 10)to trigger an interrupt on state change
   PCMSK0 |= (1 << PCINT3);  // set PCINT3 (digital input 11)to trigger an interrupt on state change
-  Serial.begin(115200); 
-  Serial.println("Program Started");
-  control = 'n';
+  topRight.attach(TR); 
+  topLeft.attach(TL);
+  bottomLeft.attach(BL);
+  bottomRight.attach(BR);
+  topRight.write(0); // writes to ports
+  topLeft.write(0);
+  bottomLeft.write(0);
+  bottomRight.write(0);
 }
 
 //Main program loop
 void loop(){
-  while (Serial.available()) {
-    char c = Serial.read();  //gets one byte from serial buffer
-    readString += c; //makes the string readString
-    delay(2);  //slow looping to allow buffer to fill with next character
-  }
-
-  if (readString.length() > 0) {
-    Serial.println(readString);  //so you can see the captured string
-    int n = 0;
-    if (readString == "a"){
-      Serial.println("Attached motor");
-      topRight.attach(TR); 
-      topLeft.attach(TL);
-      bottomLeft.attach(BL);
-      bottomRight.attach(BR);
-      Serial.print("writing Angle: "); 
-      Serial.println(n); // number
-      topRight.write(n); // writes to ports
-      topLeft.write(n);
-      bottomLeft.write(n);
-      bottomRight.write(n);
-    }
-    else if(readString == "r"){
-      Serial.println("Receiver Control");
-      control = 'r';
-    }
-    else{
-      n = readString.toInt();  //convert readString into a number
-    }
-    // auto select appropriate value, copied from someone elses code.
-    if(n >= 500){
-      Serial.print("writing Microseconds: "); // serial display
-      Serial.println(n); // number
-      control = 'n';
-      topRight.writeMicroseconds(n);
-      topLeft.writeMicroseconds(n);
-      bottomLeft.writeMicroseconds(n);
-      bottomRight.writeMicroseconds(n);
-    }
-  }
-  if(control == 'r'){
-    driveMotors();
-  }
-  else{
-    print_signals();
-    delay(500);
-  }
-  readString = "";
+  driveMotors();
 }
 
 //This routine is called every time input 8, 9, 10 or 11 changed state
@@ -183,22 +141,22 @@ void driveMotors(){
 
   trMotor = leftRollPositive*downPositive;  //CLOCKWISE
   trMotor /= 1000;
-  trMotor *= leftYawPositive;
+  trMotor *= rightYawPositive;
   trMotor /= 1000;
 
   tlMotor = rightRollPositive*downPositive;
   tlMotor /= 1000;
-  tlMotor *=rightYawPositive;
+  tlMotor *=leftYawPositive;
   tlMotor /= 1000;
 
   blMotor = rightRollPositive*upPositive;
   blMotor /= 1000;
-  blMotor *= leftYawPositive;
+  blMotor *= rightYawPositive;
   blMotor /= 1000;
 
   brMotor = leftRollPositive*upPositive;
   brMotor /= 1000;
-  brMotor *= rightYawPositive;
+  brMotor *= leftYawPositive;
   brMotor /= 1000;
 
 //  Serial.print("TR: ");
