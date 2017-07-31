@@ -1,8 +1,5 @@
 #include <Servo.h>
-#include "Adafruit_Sensor.h"
-#include "Adafruit_LSM303.h"
-#include "Adafruit_L3GD20.h"
-#include "Adafruit_9DOF.h"
+#include "gyro.h"
 #define TR 4
 #define TL 5
 #define BL 6
@@ -10,6 +7,7 @@
 
 String readString;
 char control;
+gyro imu;
 Servo topRight; //CLOCKWISE
 Servo topLeft; 
 Servo bottomLeft; //CLOCKWISE
@@ -37,6 +35,7 @@ void setup(){
   topLeft.write(0);
   bottomLeft.write(0);
   bottomRight.write(0);
+  imu.initSensors();
 }
 
 //Main program loop
