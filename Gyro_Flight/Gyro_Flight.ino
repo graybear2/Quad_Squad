@@ -1,3 +1,4 @@
+#include <PID_v1.h>
 #include <Servo.h>
 #include "Gyro.h"
 #define TR 4
@@ -13,13 +14,19 @@ Servo topLeft;
 Servo bottomLeft; //CLOCKWISE
 Servo bottomRight;
 
-
-//Declaring Variables
+// Declaring Variables
 byte last_channel_1, last_channel_2, last_channel_3, last_channel_4;
 int receiver_input_channel_1, receiver_input_channel_2, receiver_input_channel_3, receiver_input_channel_4;
 unsigned long timer_1, timer_2, timer_3, timer_4;
+double thrust_pitch, transmit_pitch, Kp_pitch, Ki_pitch, Kd_pitch, thrust_roll, transmit_roll, Kp_roll, Ki_roll, Kd_roll, thrust_yaw, transmit_yaw, Kp_yaw, Ki_yaw, Kd_yaw 
 
-//Setup routine
+
+// Create PID controllers
+PID pid_roll(&imu.getPitch(), &thrust_pitch, &transmit_pitch, Kp_pitch, Ki_pitch, Kd_pitch);
+PID pid_roll(&imu.getRoll(), &thrust_roll, &transmit_roll, Kp_roll, Ki_roll, Kd_roll);
+PID pid_yaw(&imu.getYaw(), &thrust_yaw, &transmit_yaw, Kp_yaw, Ki_yaw, Kd_yaw);
+
+// Setup routine
 void setup(){
   //Arduino (Atmega) pins default to inputs, so they don't need to be explicitly declared as inputs
   PCICR |= (1 << PCIE0);    // set PCIE0 to enable PCMSK0 scan
@@ -38,12 +45,12 @@ void setup(){
   imu.initSensors();
 }
 
-//Main program loop
+// Main program loop
 void loop(){
   driveMotors();
 }
 
-//This routine is called every time input 8, 9, 10 or 11 changed state
+// This routine is called every time input 8, 9, 10 or 11 changed state
 ISR(PCINT0_vect){
   //Channel 1=========================================
   if(last_channel_1 == 0 && PINB & B00000001 ){         //Input 8 changed from 0 to 1
