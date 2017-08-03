@@ -18,7 +18,7 @@ Servo bottomRight;
 byte last_channel_1, last_channel_2, last_channel_3, last_channel_4;
 int receiver_input_channel_1, receiver_input_channel_2, receiver_input_channel_3, receiver_input_channel_4;
 unsigned long timer_1, timer_2, timer_3, timer_4;
-double thrust_pitch, transmit_pitch, Kp_pitch, Ki_pitch, Kd_pitch, thrust_roll, transmit_roll, Kp_roll, Ki_roll, Kd_roll, thrust_yaw, transmit_yaw, Kp_yaw, Ki_yaw, Kd_yaw 
+double thrust_pitch, transmit_pitch, Kp_pitch, Ki_pitch, Kd_pitch, thrust_roll, transmit_roll, Kp_roll, Ki_roll, Kd_roll, thrust_yaw, transmit_yaw, Kp_yaw, Ki_yaw, Kd_yaw; 
 
 
 // Create PID controllers
