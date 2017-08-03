@@ -1,14 +1,13 @@
-#ifndef __gyro_h__
-#define __gyro_h__
+#ifndef __Gyro_h__
+#define __Gyro_h__
 
 #include <Adafruit_Sensor.h>
 #include <Adafruit_LSM303_U.h>
 #include <Adafruit_L3GD20_U.h>
 #include <Adafruit_9DOF.h>
 
-class gyro{
+class Gyro{
   public:
-    /* Assign a unique ID to the sensors */
     Adafruit_9DOF dof;
     Adafruit_LSM303_Accel_Unified accel;
     Adafruit_LSM303_Mag_Unified   mag;
@@ -16,10 +15,11 @@ class gyro{
     sensors_event_t mag_event;
     sensors_vec_t   orientation;
   
-    gyro();
+    Gyro();
     void initSensors();
     float getPitch();
     float getRoll();
+    float getYaw();
 };
 
 #endif

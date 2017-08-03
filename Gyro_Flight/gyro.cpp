@@ -1,11 +1,12 @@
-#include "gyro.h"
+#include "Gyro.h"
 
 
-gyro::gyro(){
-  
+Gyro::Gyro(){
+  this->initSensors();
 }
-void gyro::initSensors()
+void Gyro::initSensors()
 {
+  /* Assign a unique ID to the sensors */
   dof   = Adafruit_9DOF();
   accel = Adafruit_LSM303_Accel_Unified(30301);
   mag   = Adafruit_LSM303_Mag_Unified(30302);
@@ -23,19 +24,28 @@ void gyro::initSensors()
 	}
 }
 
-float gyro::getPitch(){
+float Gyro::getPitch(){
 	accel.getEvent(&accel_event);
 	if (dof.accelGetOrientation(&accel_event, &orientation))
-	{
 		return orientation.roll;
-	}
+  else
+    return -1;
+  
 }
 
-float gyro::getRoll(){
+float Gyro::getRoll(){
 	accel.getEvent(&accel_event);
 	if (dof.accelGetOrientation(&accel_event, &orientation))
-	{
-    float ret = orientation.pitch;
-		return ret;
-	}
+		return orientation.pitch;
+  else
+    return -1;
 }
+
+float Gyro::getYaw(){
+  mag.getEvent(&mag_event);
+  if (dof.magGetOrientation(SENSOR_AXIS_Z, &mag_event, &orientation))
+    return orientation.heading;
+  else
+    return -1;
+}
+
