@@ -1,5 +1,5 @@
 #include <Servo.h>
-#include "gyro.h"
+#include "Gyro.h"
 #define TR 4
 #define TL 5
 #define BL 6
@@ -7,7 +7,7 @@
 
 String readString;
 char control;
-gyro imu;
+Gyro imu;
 Servo topRight; //CLOCKWISE
 Servo topLeft; 
 Servo bottomLeft; //CLOCKWISE
@@ -122,45 +122,45 @@ void driveMotors(){
   int32_t blMotor;
   int32_t brMotor;
   
-  throttle -= 1000;
-  rightRollPositive /= 2;
-  rightRollPositive *= throttle;
-  rightRollPositive /= 1000;
-  leftRollPositive /= -2;
-  leftRollPositive += 1500;
-  leftRollPositive *= throttle;
-  leftRollPositive /= 1000;
-  upPositive /= 2;
-  upPositive *= throttle;
-  upPositive /= 1000;
-  downPositive /= -2;
-  downPositive += 1500;
-  downPositive *= throttle;
-  downPositive /= 1000; 
-  rightYawPositive /= 4;
-  rightYawPositive += 500;
-  leftYawPositive /= -4;
-  leftYawPositive += 1250;
-
-  trMotor = leftRollPositive*downPositive;  //CLOCKWISE
-  trMotor /= 1000;
-  trMotor *= rightYawPositive;
-  trMotor /= 1000;
-
-  tlMotor = rightRollPositive*downPositive;
-  tlMotor /= 1000;
-  tlMotor *=leftYawPositive;
-  tlMotor /= 1000;
-
-  blMotor = rightRollPositive*upPositive;
-  blMotor /= 1000;
-  blMotor *= rightYawPositive;
-  blMotor /= 1000;
-
-  brMotor = leftRollPositive*upPositive;
-  brMotor /= 1000;
-  brMotor *= leftYawPositive;
-  brMotor /= 1000;
+//  throttle -= 1000;
+//  rightRollPositive /= 2;
+//  rightRollPositive *= throttle;
+//  rightRollPositive /= 1000;
+//  leftRollPositive /= -2;
+//  leftRollPositive += 1500;
+//  leftRollPositive *= throttle;
+//  leftRollPositive /= 1000;
+//  upPositive /= 2;
+//  upPositive *= throttle;
+//  upPositive /= 1000;
+//  downPositive /= -2;
+//  downPositive += 1500;
+//  downPositive *= throttle;
+//  downPositive /= 1000; 
+//  rightYawPositive /= 4;
+//  rightYawPositive += 500;
+//  leftYawPositive /= -4;
+//  leftYawPositive += 1250;
+//
+//  trMotor = leftRollPositive*downPositive;  //CLOCKWISE
+//  trMotor /= 1000;
+//  trMotor *= rightYawPositive;
+//  trMotor /= 1000;
+//
+//  tlMotor = rightRollPositive*downPositive;
+//  tlMotor /= 1000;
+//  tlMotor *=leftYawPositive;
+//  tlMotor /= 1000;
+//
+//  blMotor = rightRollPositive*upPositive;
+//  blMotor /= 1000;
+//  blMotor *= rightYawPositive;
+//  blMotor /= 1000;
+//
+//  brMotor = leftRollPositive*upPositive;
+//  brMotor /= 1000;
+//  brMotor *= leftYawPositive;
+//  brMotor /= 1000;
 
 //  Serial.print("TR: ");
 //  Serial.print(trMotor);
@@ -170,6 +170,10 @@ void driveMotors(){
 //  Serial.print(blMotor);
 //  Serial.print("   BR: ");
 //  Serial.println(brMotor);
+
+  throttle -= 1000;
+  rightRollPositive = map(rightRollPositive, 1000, 2000, 500, 1000);
+  leftRollPositive  = map(leftRollPositive,  1000, 2000, 1000, 500);
 
   topRight.writeMicroseconds(trMotor+1000);
   topLeft.writeMicroseconds(tlMotor+1000);
