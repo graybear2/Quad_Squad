@@ -7,6 +7,7 @@
 #define TL 5
 #define BL 6
 #define BR 7
+#define DEBUG 0 //0 for motor output, 1 for serial output instead
 
 String readString;
 char control;
@@ -129,14 +130,15 @@ void driveMotors(){
   if(leftRollPositive  > 1500) {leftRollPositive  = 1500;}
   if(downPositive      > 1500) {downPositive      = 1500;}
   if(leftYawPositive   > 1500) {leftYawPositive   = 1500;}
-    
+
+#define MIN 750
   throttle          = map(throttle,          1000, 2000, 0,    1000);
-  rightRollPositive = map(rightRollPositive, 1500, 2000, 750,  1000);
-  leftRollPositive  = map(leftRollPositive,  1000, 1500, 1000, 750 );
-  upPositive        = map(upPositive,        1500, 2000, 750,  1000);
-  downPositive      = map(downPositive,      1000, 1500, 1000, 750 );
-  rightYawPositive  = map(rightYawPositive,  1500, 2000, 750,  1000);
-  leftYawPositive   = map(leftYawPositive,   1500, 2000, 1000, 750 );
+  rightRollPositive = map(rightRollPositive, 1500, 2000, MIN,  1000);
+  leftRollPositive  = map(leftRollPositive,  1000, 1500, 1000, MIN );
+  upPositive        = map(upPositive,        1500, 2000, MIN,  1000);
+  downPositive      = map(downPositive,      1000, 1500, 1000, MIN );
+  rightYawPositive  = map(rightYawPositive,  1500, 2000, MIN,  1000);
+  leftYawPositive   = map(leftYawPositive,   1500, 2000, 1000, MIN );
 
   rightRollPositive *= throttle;
   rightRollPositive /= 1000;
@@ -163,19 +165,22 @@ void driveMotors(){
   brMotor *= leftYawPositive;
   brMotor /= 1000;
 
-//  Serial.print("TR: ");
-//  Serial.print(trMotor);
-//  Serial.print("   TL: ");
-//  Serial.print(tlMotor);
-//  Serial.print("   BL: ");
-//  Serial.print(blMotor);
-//  Serial.print("   BR: ");
-//  Serial.println(brMotor);
-//  delay(2000);
-
-  topRight.writeMicroseconds(trMotor+1000);
-  topLeft.writeMicroseconds(tlMotor+1000);
-  bottomLeft.writeMicroseconds(blMotor+1000);
-  bottomRight.writeMicroseconds(brMotor+1000);
+  if(DEBUG){
+    Serial.print("TR: ");
+    Serial.print(trMotor);
+    Serial.print("   TL: ");
+    Serial.print(tlMotor);
+    Serial.print("   BL: ");
+    Serial.print(blMotor);
+    Serial.print("   BR: ");
+    Serial.println(brMotor);
+    delay(2000);
+  }
+  else{
+    topRight.writeMicroseconds(trMotor+1000);
+    topLeft.writeMicroseconds(tlMotor+1000);
+    bottomLeft.writeMicroseconds(blMotor+1000);
+    bottomRight.writeMicroseconds(brMotor+1000);
+  }
 }
 
