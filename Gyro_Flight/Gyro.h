@@ -17,9 +17,12 @@ class Gyro{
   
     Gyro();
     void initSensors();
-    float getPitch();
-    float getRoll();
-    float getYaw();
+    float getPitchOrientation();
+    float getRollOrientation();
+    float getYawOrientation();
+    float getPitchAccel();
+    float getRollAccel();
+    float getYawAccel();
 };
 
 #endif

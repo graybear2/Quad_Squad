@@ -10,8 +10,8 @@ void Gyro::initSensors()
   dof   = Adafruit_9DOF();
   accel = Adafruit_LSM303_Accel_Unified(30301);
   mag   = Adafruit_LSM303_Mag_Unified(30302);
-	if(!accel.begin())
-	{
+  if(!accel.begin())
+  {
 		/* There was a problem detecting the LSM303 ... check your connections */
 		Serial.println(F("Ooops, no LSM303 detected ... Check your wiring!"));
 		while(1);
@@ -24,7 +24,7 @@ void Gyro::initSensors()
 	}
 }
 
-float Gyro::getPitch(){
+float Gyro::getPitchOrientation(){
 	accel.getEvent(&accel_event);
 	if (dof.accelGetOrientation(&accel_event, &orientation))
 		return orientation.roll;
@@ -33,7 +33,7 @@ float Gyro::getPitch(){
   
 }
 
-float Gyro::getRoll(){
+float Gyro::getRollOrientation(){
 	accel.getEvent(&accel_event);
 	if (dof.accelGetOrientation(&accel_event, &orientation))
 		return orientation.pitch;
@@ -41,11 +41,26 @@ float Gyro::getRoll(){
     return -1;
 }
 
-float Gyro::getYaw(){
+float Gyro::getYawOrientation(){
   mag.getEvent(&mag_event);
   if (dof.magGetOrientation(SENSOR_AXIS_Z, &mag_event, &orientation))
     return orientation.heading;
   else
     return -1;
+}
+
+float Gyro::getPitchAccel(){
+  accel.getEvent(&accel_event);
+  return accel_event.acceleration.x;
+}
+
+float Gyro::getRollAccel(){
+  accel.getEvent(&accel_event);
+  return accel_event.acceleration.y;
+}
+
+float Gyro::getYawAccel(){
+  accel.getEvent(&accel_event);
+  return accel_event.acceleration.z;
 }
 
