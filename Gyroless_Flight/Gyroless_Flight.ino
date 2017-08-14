@@ -7,7 +7,7 @@
 #define TL 5
 #define BL 6
 #define BR 7
-#define DEBUG 0 //0 for motor output, 1 for serial output instead
+#define DEBUG 1 //0 for motor output, 1 for serial output instead
 
 String readString;
 char control;
@@ -145,7 +145,7 @@ void driveMotors(){
   leftRollPositive  *= throttle;
   leftRollPositive  /= 1000;
   
-  trMotor = leftRollPositive*downPositive;  //CLOCKWISE
+  trMotor  = leftRollPositive*downPositive;  //CLOCKWISE
   trMotor /= 1000;
   trMotor *= rightYawPositive;
   trMotor /= 1000;
