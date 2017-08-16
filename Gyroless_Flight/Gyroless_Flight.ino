@@ -7,7 +7,7 @@
 #define TL 5
 #define BL 6
 #define BR 7
-#define DEBUG 1 //0 for motor output, 1 for serial output instead
+#define DEBUG 0 //0 for motor output, 1 for serial output instead
 
 String readString;
 char control;
@@ -38,6 +38,9 @@ void setup(){
   topLeft.write(0);
   bottomLeft.write(0);
   bottomRight.write(0);
+
+  if(DEBUG)
+    Serial.begin(115200);
 }
 
 //Main program loop
@@ -102,7 +105,7 @@ void print_signals(){
   if(receiver_input_channel_1 - 1480 < 0)Serial.print("vvv   ");
   else if(receiver_input_channel_1 - 1520 > 0)Serial.print("^^^   ");
   else Serial.print("-+-");
-  Serial.println(receiver_input_channel_1);
+  Serial.print(receiver_input_channel_1);
   
   Serial.print("  Yaw:");
   if(receiver_input_channel_4 - 1480 < 0)Serial.print("<<<");
@@ -138,7 +141,7 @@ void driveMotors(){
   upPositive        = map(upPositive,        1500, 2000, MIN,  1000);
   downPositive      = map(downPositive,      1000, 1500, 1000, MIN );
   rightYawPositive  = map(rightYawPositive,  1500, 2000, MIN,  1000);
-  leftYawPositive   = map(leftYawPositive,   1500, 2000, 1000, MIN );
+  leftYawPositive   = map(leftYawPositive,   1000, 1500, 1000, MIN );
 
   rightRollPositive *= throttle;
   rightRollPositive /= 1000;
@@ -174,6 +177,19 @@ void driveMotors(){
     Serial.print(blMotor);
     Serial.print("   BR: ");
     Serial.println(brMotor);
+
+//    Serial.print("right: ");
+//    Serial.print(rightRollPositive);
+//    Serial.print("  left: ");
+//    Serial.print(leftRollPositive);
+//    Serial.print("  up: ");
+//    Serial.print(upPositive);
+//    Serial.print("  down: ");
+//    Serial.print(downPositive);
+//    Serial.print("  rightYawPositive: ");
+//    Serial.print(rightYawPositive);
+//    Serial.print("  leftYawPositive: ");
+//    Serial.println(leftYawPositive);
     delay(2000);
   }
   else{
