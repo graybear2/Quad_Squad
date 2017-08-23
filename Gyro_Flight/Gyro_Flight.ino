@@ -52,23 +52,37 @@ void setup(){
 
 // Main program loop
 void loop(){
+
+   // get raw linear acceleration data from IMU
    xAccelRaw = imu.getAccelX();
    yAccelRaw = imu.getAccelY();
    zAccelRaw = imu.getAccelZ();
-   
+
+   // calculate magnitude of acceleration
    accelMag = sqrt(sq(xAccelRaw) + sq(yAccelRaw) + sq(zAccelRaw));
+
+   // ignore outliers or weird accelerometer spikes
    if(accelMag > .5 && accelMag < 4) {
+    // calculate pitch angle based on accelerometer
     float pitchAccel = atan2(-yAccelRaw, zAccelRaw) * 180.0 / M_PI;
+    
+    // calculate roll angle based on accelerometer
     float rollAccel = atan2(xAccelRaw, sqrt(sq(yAccelRaw) + sq(zAccelRaw))) * 180.0 / M_PI;
+
+    // use complementary filter to improve angle estimation on pitch and roll
     nowPitch = compFilter(pitchGyroRaw, pitchAccel);
     nowRoll = compFilter(rollGyroRaw, rollAccel);    
    }
    else {
+    // if acceleromter data is weird, ignore
     nowPitch = rollGyroRaw;
     nowRoll = pitchGyroRaw;
    }
+   // yaw is not affected by complementary filter
    nowYaw = imu.getYawOrientation();
 
+
+   // for complementary filter testing only
    Serial.print(F("Pitch: "));
    Serial.print(nowPitch);
    Serial.print(F("/tRoll: "));
@@ -76,8 +90,8 @@ void loop(){
    Serial.print(F("/tYaw: "));
    Serial.print(nowYaw);
    Serial.println("");
-  
-  driveMotors();
+    
+   driveMotors();
 }
 
 // This routine is called every time input 8, 9, 10 or 11 changed state
@@ -219,6 +233,7 @@ void driveMotors(){
 }
 
 double compFilter(double gyroAngle, double accelAngle) {
+  // based on testing the .98 and .02 can be changed to improve filtering
   double angleFiltered = (gyroAngle * .98) + (accelAngle * .02);
   return angleFiltered;  
 }
