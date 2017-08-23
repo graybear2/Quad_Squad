@@ -1,6 +1,7 @@
 #include <PID_v1.h>
 #include <Servo.h>
 #include "Gyro.h"
+#include <math.h>
 #define TR 4
 #define TL 5
 #define BL 6
@@ -18,17 +19,20 @@ Servo bottomRight;
 byte last_channel_1, last_channel_2, last_channel_3, last_channel_4;
 int receiver_input_channel_1, receiver_input_channel_2, receiver_input_channel_3, receiver_input_channel_4;
 unsigned long timer_1, timer_2, timer_3, timer_4;
-double thrust_pitch, transmit_pitch, Kp_pitch, Ki_pitch, Kd_pitch, thrust_roll, transmit_roll, Kp_roll, Ki_roll, Kd_roll, thrust_yaw, transmit_yaw, Kp_yaw, Ki_yaw, Kd_yaw; 
-
+double nowPitch, setPitch, goalPitch, KpPitch, KiPitch, KdPitch;
+double nowRoll, setRoll, goalRoll, KpRoll, KiRoll, KdRoll;
+double nowYaw, setYaw, goalYaw, KpYaw, KiYaw, KdYaw; 
+float xAccelRaw, yAccelRaw, zAccelRaw, accelMag;
+float pitchGyroRaw, rollGyroRaw, yawGyroRaw;
 
 // Create PID controllers
-PID pid_roll(&imu.getPitch(), &thrust_pitch, &transmit_pitch, Kp_pitch, Ki_pitch, Kd_pitch);
-PID pid_roll(&imu.getRoll(), &thrust_roll, &transmit_roll, Kp_roll, Ki_roll, Kd_roll);
-PID pid_yaw(&imu.getYaw(), &thrust_yaw, &transmit_yaw, Kp_yaw, Ki_yaw, Kd_yaw);
+PID pidPitch(&nowPitch, &setPitch, &goalPitch, KpPitch, KiPitch, KdPitch, DIRECT);
+PID pidRoll(&nowRoll, &setRoll, &goalRoll, KpRoll, KiRoll, KdRoll, DIRECT);
+PID pidYaw(&nowYaw, &setYaw, &goalYaw, KpYaw, KiYaw, KdYaw, DIRECT);
 
 // Setup routine
 void setup(){
-  //Arduino (Atmega) pins default to inputs, so they don't need to be explicitly declared as inputs
+  // Arduino (Atmega) pins default to inputs, so they don't need to be explicitly declared as inputs
   PCICR |= (1 << PCIE0);    // set PCIE0 to enable PCMSK0 scan
   PCMSK0 |= (1 << PCINT0);  // set PCINT0 (digital input 8) to trigger an interrupt on state change
   PCMSK0 |= (1 << PCINT1);  // set PCINT1 (digital input 9)to trigger an interrupt on state change
@@ -47,6 +51,25 @@ void setup(){
 
 // Main program loop
 void loop(){
+   xAccelRaw = imu.getAccelX();
+   yAccelRaw = imu.getAccelY();
+   zAccelRaw = imu.getAccelZ();
+   
+   accelMag = sqrt(sq(xAccelRaw) + sq(yAccelRaw) + sq(zAccelRaw));
+   if(accelMag > .5 && accelMag < 4) {
+    float pitchAccel = atan2(-yAccelRaw, zAccelRaw) * 180.0 / M_PI;
+    float rollAccel = atan2(xAccelRaw, sqrt(sq(yAccelRaw) + sq(zAccelRaw))) * 180.0 / M_PI;
+    nowPitch = compFilter(pitchGyroRaw, pitchAccel);
+    nowRoll = compFilter(rollGyroRaw, rollAccel);    
+   }
+   else {
+    nowPitch = rollGyroRaw;
+    nowRoll = pitchGyroRaw;
+   }
+   nowYaw = imu.getYawOrientation();
+
+   
+  
   driveMotors();
 }
 
@@ -186,5 +209,10 @@ void driveMotors(){
   topLeft.writeMicroseconds(tlMotor+1000);
   bottomLeft.writeMicroseconds(blMotor+1000);
   bottomRight.writeMicroseconds(brMotor+1000);
+}
+
+double compFilter(double gyroAngle, double accelAngle) {
+  double angleFiltered = (gyroAngle * .98) + (accelAngle * .02);
+  return angleFiltered;  
 }
 

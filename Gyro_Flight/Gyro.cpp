@@ -49,17 +49,17 @@ float Gyro::getYawOrientation(){
     return -1;
 }
 
-float Gyro::getPitchAccel(){
+float Gyro::getAccelX(){
   accel.getEvent(&accel_event);
   return accel_event.acceleration.x;
 }
 
-float Gyro::getRollAccel(){
+float Gyro::getAccelY(){
   accel.getEvent(&accel_event);
   return accel_event.acceleration.y;
 }
 
-float Gyro::getYawAccel(){
+float Gyro::getAccelZ(){
   accel.getEvent(&accel_event);
   return accel_event.acceleration.z;
 }

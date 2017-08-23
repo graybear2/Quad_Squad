@@ -20,9 +20,9 @@ class Gyro{
     float getPitchOrientation();
     float getRollOrientation();
     float getYawOrientation();
-    float getPitchAccel();
-    float getRollAccel();
-    float getYawAccel();
+    float getAccelX();
+    float getAccelY();
+    float getAccelZ();
 };
 
 #endif
