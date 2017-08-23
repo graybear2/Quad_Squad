@@ -47,6 +47,7 @@ void setup(){
   bottomLeft.write(0);
   bottomRight.write(0);
   imu.initSensors();
+  Serial.begin(9600);
 }
 
 // Main program loop
@@ -68,7 +69,13 @@ void loop(){
    }
    nowYaw = imu.getYawOrientation();
 
-   
+   Serial.print(F("Pitch: "));
+   Serial.print(nowPitch);
+   Serial.print(F("/tRoll: "));
+   Serial.print(nowRoll);
+   Serial.print(F("/tYaw: "));
+   Serial.print(nowYaw);
+   Serial.println("");
   
   driveMotors();
 }
