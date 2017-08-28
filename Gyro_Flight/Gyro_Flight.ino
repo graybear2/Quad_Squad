@@ -35,7 +35,6 @@ void setup(){
   topLeft.write(0);
   bottomLeft.write(0);
   bottomRight.write(0);
-  imu.initSensors();
 }
 
 //Main program loop
