@@ -1,32 +1,38 @@
 #include <PID_v1.h>
 #include <Servo.h>
-#include "Adafruit_Sensor.h"
-#include "Adafruit_LSM303.h"
-#include "Adafruit_L3GD20.h"
-#include "Adafruit_9DOF.h"
-
+#include "Gyro.h"
+#include <math.h>
 #define TR 4
 #define TL 5
 #define BL 6
 #define BR 7
-#define DEBUG 1 //0 for motor output, 1 for serial output instead
 
 String readString;
 char control;
+Gyro imu;
 Servo topRight; //CLOCKWISE
 Servo topLeft; 
 Servo bottomLeft; //CLOCKWISE
 Servo bottomRight;
 
-
-//Declaring Variables
+// Declaring Variables
 byte last_channel_1, last_channel_2, last_channel_3, last_channel_4;
 int receiver_input_channel_1, receiver_input_channel_2, receiver_input_channel_3, receiver_input_channel_4;
 unsigned long timer_1, timer_2, timer_3, timer_4;
+double nowPitch, setPitch, goalPitch, KpPitch, KiPitch, KdPitch;
+double nowRoll, setRoll, goalRoll, KpRoll, KiRoll, KdRoll;
+double nowYaw, setYaw, goalYaw, KpYaw, KiYaw, KdYaw; 
+float xAccelRaw, yAccelRaw, zAccelRaw, accelMag;
+float pitchGyroRaw, rollGyroRaw, yawGyroRaw;
 
-//Setup routine
+// Create PID controllers
+PID pidPitch(&nowPitch, &setPitch, &goalPitch, KpPitch, KiPitch, KdPitch, DIRECT);
+PID pidRoll(&nowRoll, &setRoll, &goalRoll, KpRoll, KiRoll, KdRoll, DIRECT);
+PID pidYaw(&nowYaw, &setYaw, &goalYaw, KpYaw, KiYaw, KdYaw, DIRECT);
+
+// Setup routine
 void setup(){
-  //Arduino (Atmega) pins default to inputs, so they don't need to be explicitly declared as inputs
+  // Arduino (Atmega) pins default to inputs, so they don't need to be explicitly declared as inputs
   PCICR |= (1 << PCIE0);    // set PCIE0 to enable PCMSK0 scan
   PCMSK0 |= (1 << PCINT0);  // set PCINT0 (digital input 8) to trigger an interrupt on state change
   PCMSK0 |= (1 << PCINT1);  // set PCINT1 (digital input 9)to trigger an interrupt on state change
@@ -40,17 +46,58 @@ void setup(){
   topLeft.write(0);
   bottomLeft.write(0);
   bottomRight.write(0);
-
-  if(DEBUG)
-    Serial.begin(115200);
+<<<<<<< HEAD
+  imu.initSensors();
+  Serial.begin(9600);
+=======
+>>>>>>> master
 }
 
-//Main program loop
+// Main program loop
 void loop(){
-  driveMotors();
+
+   // get raw linear acceleration data from IMU
+   xAccelRaw = imu.getAccelX();
+   yAccelRaw = imu.getAccelY();
+   zAccelRaw = imu.getAccelZ();
+
+   // calculate magnitude of acceleration
+   accelMag = sqrt(sq(xAccelRaw) + sq(yAccelRaw) + sq(zAccelRaw));
+
+   // ignore outliers or weird accelerometer spikes
+   if(accelMag > .5 && accelMag < 4) {
+    // calculate pitch angle based on accelerometer
+    float pitchAccel = atan2(-yAccelRaw, zAccelRaw) * 180.0 / M_PI;
+    
+    // calculate roll angle based on accelerometer
+    float rollAccel = atan2(xAccelRaw, sqrt(sq(yAccelRaw) + sq(zAccelRaw))) * 180.0 / M_PI;
+
+    // use complementary filter to improve angle estimation on pitch and roll
+    nowPitch = compFilter(pitchGyroRaw, pitchAccel);
+    nowRoll = compFilter(rollGyroRaw, rollAccel);    
+   }
+   else {
+    // if acceleromter data is weird, ignore
+    nowPitch = rollGyroRaw;
+    nowRoll = pitchGyroRaw;
+   }
+   // yaw is not affected by complementary filter
+   nowYaw = imu.getYawOrientation();
+
+
+   // for complementary filter testing only
+   Serial.print(F("Pitch: "));
+   Serial.print(nowPitch);
+   Serial.print(F("/tRoll: "));
+   Serial.print(nowRoll);
+   Serial.print(F("/tYaw: "));
+   Serial.print(nowYaw);
+   Serial.println("");
+    
+   driveMotors();
 }
 
-//This routine is called every time input 8, 9, 10 or 11 changed state
+// This routine is called every time input 8, 9, 10 or 11 changed state
 ISR(PCINT0_vect){
   //Channel 1=========================================
   if(last_channel_1 == 0 && PINB & B00000001 ){         //Input 8 changed from 0 to 1
@@ -110,7 +157,7 @@ void driveMotors(){
   if(downPositive      > 1500) {downPositive      = 1500;}
   if(leftYawPositive   > 1500) {leftYawPositive   = 1500;}
 
-#define MIN 750
+#define MIN 750 //assigns MIN as 750 (done this way bc it uses less memory than "int MIN = 750")
   throttle          = map(throttle,          1000, 2000, 0,    1000);
   rightRollPositive = map(rightRollPositive, 1500, 2000, MIN,  1000);
   leftRollPositive  = map(leftRollPositive,  1000, 1500, 1000, MIN );
@@ -118,61 +165,19 @@ void driveMotors(){
   downPositive      = map(downPositive,      1000, 1500, 1000, MIN );
   rightYawPositive  = map(rightYawPositive,  1500, 2000, MIN,  1000);
   leftYawPositive   = map(leftYawPositive,   1000, 1500, 1000, MIN );
+  //AT THIS POINT: every input has been scaled to range from MIN to 1000
+  //EXCEPT for throttle which ranges from 0 to 1000
 
-  rightRollPositive *= throttle;
-  rightRollPositive /= 1000;
-  leftRollPositive  *= throttle;
-  leftRollPositive  /= 1000;
-  
-  trMotor  = leftRollPositive*downPositive;  //CLOCKWISE
-  trMotor /= 1000;
-  trMotor *= rightYawPositive;
-  trMotor /= 1000;
+  //Here is where you would give motor input ranging from 1000-2000
+//  topRight.writeMicroseconds(<some calculated number>);
+//  topLeft.writeMicroseconds(<some calculated number>);
+//  bottomLeft.writeMicroseconds(<some calculated number>);
+//  bottomRight.writeMicroseconds(<some calculated number>);
+}
 
-  tlMotor  = rightRollPositive*downPositive;
-  tlMotor /= 1000;
-  tlMotor *= leftYawPositive;
-  tlMotor /= 1000;
-
-  blMotor  = rightRollPositive*upPositive;
-  blMotor /= 1000;
-  blMotor *= rightYawPositive;
-  blMotor /= 1000;
-
-  brMotor  = leftRollPositive*upPositive;
-  brMotor /= 1000;
-  brMotor *= leftYawPositive;
-  brMotor /= 1000;
-
-  if(DEBUG){
-    Serial.print("TR: ");
-    Serial.print(trMotor);
-    Serial.print("   TL: ");
-    Serial.print(tlMotor);
-    Serial.print("   BL: ");
-    Serial.print(blMotor);
-    Serial.print("   BR: ");
-    Serial.println(brMotor);
-
-//    Serial.print("right: ");
-//    Serial.print(rightRollPositive);
-//    Serial.print("  left: ");
-//    Serial.print(leftRollPositive);
-//    Serial.print("  up: ");
-//    Serial.print(upPositive);
-//    Serial.print("  down: ");
-//    Serial.print(downPositive);
-//    Serial.print("  rightYawPositive: ");
-//    Serial.print(rightYawPositive);
-//    Serial.print("  leftYawPositive: ");
-//    Serial.println(leftYawPositive);
-    delay(2000);
-  }
-  else{
-    topRight.writeMicroseconds(trMotor+1000);
-    topLeft.writeMicroseconds(tlMotor+1000);
-    bottomLeft.writeMicroseconds(blMotor+1000);
-    bottomRight.writeMicroseconds(brMotor+1000);
-  }
+double compFilter(double gyroAngle, double accelAngle) {
+  // based on testing the .98 and .02 can be changed to improve filtering
+  double angleFiltered = (gyroAngle * .98) + (accelAngle * .02);
+  return angleFiltered;  
 }
 
