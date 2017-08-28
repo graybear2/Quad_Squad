@@ -82,32 +82,6 @@ ISR(PCINT0_vect){
     receiver_input_channel_4 = micros() - timer_4;      //Channel 4 is micros() - timer_4
   }
 }
-//Subroutine for displaying the receiver signals
-void print_signals(){
-  Serial.print("Roll:");
-  if(receiver_input_channel_2 - 1480 < 0)Serial.print("<<<");
-  else if(receiver_input_channel_2 - 1520 > 0)Serial.print(">>>");
-  else Serial.print("-+-");
-  Serial.print(receiver_input_channel_2);
-  
-  Serial.print("  Pitch:");
-  if(receiver_input_channel_3 - 1480 < 0)Serial.print("^^^");
-  else if(receiver_input_channel_3 - 1520 > 0)Serial.print("vvv");
-  else Serial.print("-+-");
-  Serial.print(receiver_input_channel_3);
-  
-  Serial.print("  Gas: ");
-  if(receiver_input_channel_1 - 1480 < 0)Serial.print("vvv   ");
-  else if(receiver_input_channel_1 - 1520 > 0)Serial.print("^^^   ");
-  else Serial.print("-+-");
-  Serial.println(receiver_input_channel_1);
-  
-  Serial.print("  Yaw:");
-  if(receiver_input_channel_4 - 1480 < 0)Serial.print("<<<");
-  else if(receiver_input_channel_4 - 1520 > 0)Serial.print(">>>");
-  else Serial.print("-+-");
-  Serial.println(receiver_input_channel_4);
-}
 
 void driveMotors(){
   int32_t throttle          = receiver_input_channel_1;
@@ -122,62 +96,28 @@ void driveMotors(){
   int32_t blMotor;
   int32_t brMotor;
   
-//  throttle -= 1000;
-//  rightRollPositive /= 2;
-//  rightRollPositive *= throttle;
-//  rightRollPositive /= 1000;
-//  leftRollPositive /= -2;
-//  leftRollPositive += 1500;
-//  leftRollPositive *= throttle;
-//  leftRollPositive /= 1000;
-//  upPositive /= 2;
-//  upPositive *= throttle;
-//  upPositive /= 1000;
-//  downPositive /= -2;
-//  downPositive += 1500;
-//  downPositive *= throttle;
-//  downPositive /= 1000; 
-//  rightYawPositive /= 4;
-//  rightYawPositive += 500;
-//  leftYawPositive /= -4;
-//  leftYawPositive += 1250;
-//
-//  trMotor = leftRollPositive*downPositive;  //CLOCKWISE
-//  trMotor /= 1000;
-//  trMotor *= rightYawPositive;
-//  trMotor /= 1000;
-//
-//  tlMotor = rightRollPositive*downPositive;
-//  tlMotor /= 1000;
-//  tlMotor *=leftYawPositive;
-//  tlMotor /= 1000;
-//
-//  blMotor = rightRollPositive*upPositive;
-//  blMotor /= 1000;
-//  blMotor *= rightYawPositive;
-//  blMotor /= 1000;
-//
-//  brMotor = leftRollPositive*upPositive;
-//  brMotor /= 1000;
-//  brMotor *= leftYawPositive;
-//  brMotor /= 1000;
+  if(rightRollPositive < 1500) {rightRollPositive = 1500;}
+  if(upPositive        < 1500) {upPositive        = 1500;}
+  if(rightYawPositive  < 1500) {rightYawPositive  = 1500;}
+  if(leftRollPositive  > 1500) {leftRollPositive  = 1500;}
+  if(downPositive      > 1500) {downPositive      = 1500;}
+  if(leftYawPositive   > 1500) {leftYawPositive   = 1500;}
 
-//  Serial.print("TR: ");
-//  Serial.print(trMotor);
-//  Serial.print("   TL: ");
-//  Serial.print(tlMotor);
-//  Serial.print("   BL: ");
-//  Serial.print(blMotor);
-//  Serial.print("   BR: ");
-//  Serial.println(brMotor);
+#define MIN 750 //assigns MIN as 750 (done this way bc it uses less memory than "int MIN = 750")
+  throttle          = map(throttle,          1000, 2000, 0,    1000);
+  rightRollPositive = map(rightRollPositive, 1500, 2000, MIN,  1000);
+  leftRollPositive  = map(leftRollPositive,  1000, 1500, 1000, MIN );
+  upPositive        = map(upPositive,        1500, 2000, MIN,  1000);
+  downPositive      = map(downPositive,      1000, 1500, 1000, MIN );
+  rightYawPositive  = map(rightYawPositive,  1500, 2000, MIN,  1000);
+  leftYawPositive   = map(leftYawPositive,   1000, 1500, 1000, MIN );
+  //AT THIS POINT: every input has been scaled to range from MIN to 1000
+  //EXCEPT for throttle which ranges from 0 to 1000
 
-  throttle -= 1000;
-  rightRollPositive = map(rightRollPositive, 1000, 2000, 500, 1000);
-  leftRollPositive  = map(leftRollPositive,  1000, 2000, 1000, 500);
-
-  topRight.writeMicroseconds(trMotor+1000);
-  topLeft.writeMicroseconds(tlMotor+1000);
-  bottomLeft.writeMicroseconds(blMotor+1000);
-  bottomRight.writeMicroseconds(brMotor+1000);
+  //Here is where you would give motor input ranging from 1000-2000
+//  topRight.writeMicroseconds(<some calculated number>);
+//  topLeft.writeMicroseconds(<some calculated number>);
+//  bottomLeft.writeMicroseconds(<some calculated number>);
+//  bottomRight.writeMicroseconds(<some calculated number>);
 }
 

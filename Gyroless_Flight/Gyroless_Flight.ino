@@ -7,7 +7,7 @@
 #define TL 5
 #define BL 6
 #define BR 7
-#define DEBUG 0 //0 for motor output, 1 for serial output instead
+#define DEBUG 1 //0 for motor output, 1 for serial output instead
 
 String readString;
 char control;
@@ -86,32 +86,6 @@ ISR(PCINT0_vect){
     last_channel_4 = 0;                                 //Remember current input state
     receiver_input_channel_4 = micros() - timer_4;      //Channel 4 is micros() - timer_4
   }
-}
-//Subroutine for displaying the receiver signals
-void print_signals(){
-  Serial.print("Roll:");
-  if(receiver_input_channel_2 - 1480 < 0)Serial.print("<<<");
-  else if(receiver_input_channel_2 - 1520 > 0)Serial.print(">>>");
-  else Serial.print("-+-");
-  Serial.print(receiver_input_channel_2);
-  
-  Serial.print("  Pitch:");
-  if(receiver_input_channel_3 - 1480 < 0)Serial.print("^^^");
-  else if(receiver_input_channel_3 - 1520 > 0)Serial.print("vvv");
-  else Serial.print("-+-");
-  Serial.print(receiver_input_channel_3);
-  
-  Serial.print("  Gas: ");
-  if(receiver_input_channel_1 - 1480 < 0)Serial.print("vvv   ");
-  else if(receiver_input_channel_1 - 1520 > 0)Serial.print("^^^   ");
-  else Serial.print("-+-");
-  Serial.print(receiver_input_channel_1);
-  
-  Serial.print("  Yaw:");
-  if(receiver_input_channel_4 - 1480 < 0)Serial.print("<<<");
-  else if(receiver_input_channel_4 - 1520 > 0)Serial.print(">>>");
-  else Serial.print("-+-");
-  Serial.println(receiver_input_channel_4);
 }
 
 void driveMotors(){
