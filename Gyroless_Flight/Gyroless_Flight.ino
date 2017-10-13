@@ -1,8 +1,4 @@
 #include <Servo.h>
-#include "Adafruit_Sensor.h"
-#include "Adafruit_LSM303.h"
-#include "Adafruit_L3GD20.h"
-#include "Adafruit_9DOF.h"
 #define TR 4
 #define TL 5
 #define BL 6
@@ -114,34 +110,29 @@ void driveMotors(){
   leftRollPositive  = map(leftRollPositive,  1000, 1500, 1000, MIN );
   upPositive        = map(upPositive,        1500, 2000, MIN,  1000);
   downPositive      = map(downPositive,      1000, 1500, 1000, MIN );
-  rightYawPositive  = map(rightYawPositive,  1500, 2000, MIN,  1000);
-  leftYawPositive   = map(leftYawPositive,   1000, 1500, 1000, MIN );
-
-  rightRollPositive *= throttle;
-  rightRollPositive /= 1000;
-  leftRollPositive  *= throttle;
-  leftRollPositive  /= 1000;
+  rightYawPositive  = map(rightYawPositive,  1500, 2000, 500,  1000);
+  leftYawPositive   = map(leftYawPositive,   1000, 1500, 1000, 500 );
   
-  trMotor  = leftRollPositive*downPositive;  //CLOCKWISE
+  trMotor  = leftRollPositive + downPositive + rightYawPositive; //CLOCKWISE
+  trMotor /= 3;
+  trMotor *= throttle;
   trMotor /= 1000;
-  trMotor *= rightYawPositive;
-  trMotor /= 1000;
 
-  tlMotor  = rightRollPositive*downPositive;
-  tlMotor /= 1000;
-  tlMotor *= leftYawPositive;
+  tlMotor  = rightRollPositive + downPositive + leftYawPositive;
+  tlMotor /= 3;
+  tlMotor *= throttle;
   tlMotor /= 1000;
 
-  blMotor  = rightRollPositive*upPositive;
-  blMotor /= 1000;
-  blMotor *= rightYawPositive;
+  blMotor  = rightRollPositive + upPositive + rightYawPositive;
+  blMotor /= 3;
+  blMotor *= throttle;
   blMotor /= 1000;
 
-  brMotor  = leftRollPositive*upPositive;
+  brMotor  = leftRollPositive + upPositive + leftYawPositive;
+  brMotor /= 3;
+  brMotor *= throttle;
   brMotor /= 1000;
-  brMotor *= leftYawPositive;
-  brMotor /= 1000;
-
+  
   if(DEBUG){
     Serial.print("TR: ");
     Serial.print(trMotor);
@@ -167,6 +158,10 @@ void driveMotors(){
     delay(2000);
   }
   else{
+    if(trMotor < 0) {trMotor = 0;}
+    if(tlMotor < 0) {tlMotor = 0;}
+    if(blMotor < 0) {blMotor = 0;}
+    if(brMotor < 0) {blMotor = 0;}
     topRight.writeMicroseconds(trMotor+1000);
     topLeft.writeMicroseconds(tlMotor+1000);
     bottomLeft.writeMicroseconds(blMotor+1000);
