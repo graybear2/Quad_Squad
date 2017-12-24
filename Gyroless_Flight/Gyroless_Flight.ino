@@ -1,9 +1,5 @@
 #include <PID_v1.h>
 #include <Servo.h>
-#include "Adafruit_Sensor.h"
-#include "Adafruit_LSM303.h"
-#include "Adafruit_L3GD20.h"
-#include "Adafruit_9DOF.h"
 
 #define TR 4
 #define TL 5
@@ -11,7 +7,6 @@
 #define BR 7
 #define DEBUG 1 //0 for motor output, 1 for serial output instead
 
-String readString;
 char control;
 Servo topRight; //CLOCKWISE
 Servo topLeft; 
@@ -92,58 +87,61 @@ ISR(PCINT0_vect){
 
 void driveMotors(){
   int32_t throttle          = receiver_input_channel_1;
-  int32_t rightRollPositive = receiver_input_channel_2;
-  int32_t upPositive        = receiver_input_channel_3;
-  int32_t rightYawPositive  = receiver_input_channel_4;
-  int32_t leftRollPositive  = rightRollPositive;
-  int32_t downPositive      = upPositive;
-  int32_t leftYawPositive   = rightYawPositive;
+  int16_t rightRollPositive = receiver_input_channel_2;
+  int16_t upPositive        = receiver_input_channel_3;
+  int16_t rightYawPositive  = receiver_input_channel_4;
+  int16_t leftRollPositive  = rightRollPositive;
+  int16_t downPositive      = upPositive;
+  int16_t leftYawPositive   = rightYawPositive;
   int32_t trMotor;
   int32_t tlMotor;
   int32_t blMotor;
   int32_t brMotor;
   
-  if(rightRollPositive < 1500) {rightRollPositive = 1500;}
-  if(upPositive        < 1500) {upPositive        = 1500;}
-  if(rightYawPositive  < 1500) {rightYawPositive  = 1500;}
-  if(leftRollPositive  > 1500) {leftRollPositive  = 1500;}
-  if(downPositive      > 1500) {downPositive      = 1500;}
-  if(leftYawPositive   > 1500) {leftYawPositive   = 1500;}
+//  if(rightRollPositive < 1500) {rightRollPositive = 1500;}
+//  if(upPositive        < 1500) {upPositive        = 1500;}
+//  if(rightYawPositive  < 1500) {rightYawPositive  = 1500;}
+//  if(leftRollPositive  > 1500) {leftRollPositive  = 1500;}
+//  if(downPositive      > 1500) {downPositive      = 1500;}
+//  if(leftYawPositive   > 1500) {leftYawPositive   = 1500;}
 
-#define MIN 750
+#define MIN 500
+//  throttle          = map(throttle,          1000, 2000, 0,    1000);
+//  rightRollPositive = map(rightRollPositive, 1500, 2000, MIN,  1000);
+//  leftRollPositive  = map(leftRollPositive,  1000, 1500, 1000, MIN );
+//  upPositive        = map(upPositive,        1500, 2000, MIN,  1000);
+//  downPositive      = map(downPositive,      1000, 1500, 1000, MIN );
+//  rightYawPositive  = map(rightYawPositive,  1500, 2000, 500,  1000);
+//  leftYawPositive   = map(leftYawPositive,   1000, 1500, 1000, 500 );
+
   throttle          = map(throttle,          1000, 2000, 0,    1000);
-  rightRollPositive = map(rightRollPositive, 1500, 2000, MIN,  1000);
-  leftRollPositive  = map(leftRollPositive,  1000, 1500, 1000, MIN );
-  upPositive        = map(upPositive,        1500, 2000, MIN,  1000);
-  downPositive      = map(downPositive,      1000, 1500, 1000, MIN );
-  rightYawPositive  = map(rightYawPositive,  1500, 2000, MIN,  1000);
-  leftYawPositive   = map(leftYawPositive,   1000, 1500, 1000, MIN );
-
-  rightRollPositive *= throttle;
-  rightRollPositive /= 1000;
-  leftRollPositive  *= throttle;
-  leftRollPositive  /= 1000;
+  rightRollPositive = map(rightRollPositive, 1000, 2000, MIN,  1000);
+  leftRollPositive  = map(leftRollPositive,  1000, 2000, 1000, MIN );
+  upPositive        = map(upPositive,        1000, 2000, MIN,  1000);
+  downPositive      = map(downPositive,      1000, 2000, 1000, MIN );
+  rightYawPositive  = map(rightYawPositive,  1000, 2000, MIN,  1000);
+  leftYawPositive   = map(leftYawPositive,   1000, 2000, 1000, MIN );
   
-  trMotor  = leftRollPositive*downPositive;  //CLOCKWISE
+  trMotor  = leftRollPositive + downPositive + rightYawPositive; //CLOCKWISE
+  trMotor /= 3;
+  trMotor *= throttle;
   trMotor /= 1000;
-  trMotor *= rightYawPositive;
-  trMotor /= 1000;
 
-  tlMotor  = rightRollPositive*downPositive;
-  tlMotor /= 1000;
-  tlMotor *= leftYawPositive;
+  tlMotor  = rightRollPositive + downPositive + leftYawPositive;
+  tlMotor /= 3;
+  tlMotor *= throttle;
   tlMotor /= 1000;
 
-  blMotor  = rightRollPositive*upPositive;
-  blMotor /= 1000;
-  blMotor *= rightYawPositive;
+  blMotor  = rightRollPositive + upPositive + rightYawPositive;
+  blMotor /= 3;
+  blMotor *= throttle;
   blMotor /= 1000;
 
-  brMotor  = leftRollPositive*upPositive;
+  brMotor  = leftRollPositive + upPositive + leftYawPositive;
+  brMotor /= 3;
+  brMotor *= throttle;
   brMotor /= 1000;
-  brMotor *= leftYawPositive;
-  brMotor /= 1000;
-
+  
   if(DEBUG){
     Serial.print("TR: ");
     Serial.print(trMotor);
@@ -169,6 +167,10 @@ void driveMotors(){
     delay(2000);
   }
   else{
+    trMotor = constrain(trMotor, 0, 1000);
+    tlMotor = constrain(tlMotor, 0, 1000);
+    blMotor= constrain(blMotor, 0, 1000);
+    brMotor = constrain(brMotor, 0, 1000);
     topRight.writeMicroseconds(trMotor+1000);
     topLeft.writeMicroseconds(tlMotor+1000);
     bottomLeft.writeMicroseconds(blMotor+1000);

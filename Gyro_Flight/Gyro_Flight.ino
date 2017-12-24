@@ -7,8 +7,6 @@
 #define BL 6
 #define BR 7
 
-String readString;
-char control;
 Gyro imu;
 Servo topRight; //CLOCKWISE
 Servo topLeft; 
