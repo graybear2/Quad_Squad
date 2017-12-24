@@ -145,21 +145,14 @@ void driveMotors(){
   int32_t blMotor;
   int32_t brMotor;
 
-  if(rightRollPositive < 1500) {rightRollPositive = 1500;}
-  if(upPositive        < 1500) {upPositive        = 1500;}
-  if(rightYawPositive  < 1500) {rightYawPositive  = 1500;}
-  if(leftRollPositive  > 1500) {leftRollPositive  = 1500;}
-  if(downPositive      > 1500) {downPositive      = 1500;}
-  if(leftYawPositive   > 1500) {leftYawPositive   = 1500;}
-
-#define MIN 750 //assigns MIN as 750 (done this way bc it uses less memory than "int MIN = 750")
+  #define MIN 500
   throttle          = map(throttle,          1000, 2000, 0,    1000);
-  rightRollPositive = map(rightRollPositive, 1500, 2000, MIN,  1000);
-  leftRollPositive  = map(leftRollPositive,  1000, 1500, 1000, MIN );
-  upPositive        = map(upPositive,        1500, 2000, MIN,  1000);
-  downPositive      = map(downPositive,      1000, 1500, 1000, MIN );
-  rightYawPositive  = map(rightYawPositive,  1500, 2000, MIN,  1000);
-  leftYawPositive   = map(leftYawPositive,   1000, 1500, 1000, MIN );
+  rightRollPositive = map(rightRollPositive, 1000, 2000, MIN,  1000);
+  leftRollPositive  = map(leftRollPositive,  1000, 2000, 1000, MIN );
+  upPositive        = map(upPositive,        1000, 2000, MIN,  1000);
+  downPositive      = map(downPositive,      1000, 2000, 1000, MIN );
+  rightYawPositive  = map(rightYawPositive,  1000, 2000, MIN,  1000);
+  leftYawPositive   = map(leftYawPositive,   1000, 2000, 1000, MIN );
   //AT THIS POINT: every input has been scaled to range from MIN to 1000
   //EXCEPT for throttle which ranges from 0 to 1000
 
