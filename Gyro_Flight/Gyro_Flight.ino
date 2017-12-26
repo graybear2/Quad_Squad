@@ -6,6 +6,7 @@
 #define TL 5
 #define BL 6
 #define BR 7
+#define DEBUG 1
 
 Gyro imu;
 Servo topRight; //CLOCKWISE
@@ -17,9 +18,18 @@ Servo bottomRight;
 byte last_channel_1, last_channel_2, last_channel_3, last_channel_4;
 int receiver_input_channel_1, receiver_input_channel_2, receiver_input_channel_3, receiver_input_channel_4;
 unsigned long timer_1, timer_2, timer_3, timer_4;
-double nowPitch, setPitch, goalPitch, KpPitch, KiPitch, KdPitch;
-double nowRoll, setRoll, goalRoll, KpRoll, KiRoll, KdRoll;
-double nowYaw, setYaw, goalYaw, KpYaw, KiYaw, KdYaw; 
+double nowPitch, setPitch, goalPitch;
+#define KpPitch 50
+#define KiPitch 5
+#define KdPitch 0
+double nowRoll, setRoll, goalRoll;
+#define KpRoll 50
+#define KiRoll 5
+#define KdRoll 0
+double nowYaw, setYaw, goalYaw;
+#define KpYaw 50
+#define KiYaw 5
+#define KdYaw 0
 float xAccelRaw, yAccelRaw, zAccelRaw, accelMag;
 float pitchGyroRaw, rollGyroRaw, yawGyroRaw;
 
@@ -44,7 +54,8 @@ void setup(){
   topLeft.write(0);
   bottomLeft.write(0);
   bottomRight.write(0);
-  Serial.begin(115200);
+  if(DEBUG)
+    Serial.begin(115200);
 }
 
 //Main program loop
@@ -79,16 +90,17 @@ void loop(){
    nowYaw = imu.getYawOrientation();
 
 
-   // for complementary filter testing only
-   Serial.print(F("Pitch: "));
-   Serial.print(nowPitch);
-   Serial.print(F("/tRoll: "));
-   Serial.print(nowRoll);
-   Serial.print(F("/tYaw: "));
-   Serial.print(nowYaw);
-   Serial.println("");
-    
-   driveMotors();
+  if(DEBUG){
+     // for complementary filter testing only
+     Serial.print(F("Pitch: "));
+     Serial.print(nowPitch);
+     Serial.print(F("/tRoll: "));
+     Serial.print(nowRoll);
+     Serial.print(F("/tYaw: "));
+     Serial.print(nowYaw);
+     Serial.println("");
+  }
+  driveMotors();
 }
 
 //This routine is called every time input 8, 9, 10 or 11 changed state
